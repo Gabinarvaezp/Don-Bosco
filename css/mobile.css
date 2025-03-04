@@ -1,39 +1,136 @@
 @media (max-width: 768px) {
+    :root {
+        --padding-boton: 15px;
+    }
+
+    body {
+        padding: 10px;
+    }
+
     .container {
         padding: 10px;
     }
 
-    .btn-grande {
+    /* Header */
+    .header h1 {
+        font-size: 2em;
+    }
+
+    .resumen-rapido {
+        grid-template-columns: 1fr;
+    }
+
+    /* Botones */
+    .btn-principal {
+        font-size: 1.1em;
         padding: 15px;
-        font-size: 1.2rem;
+    }
+
+    /* Formularios */
+    .campo-formulario {
+        margin-bottom: 15px;
     }
 
     .input-grande {
+        font-size: 1em;
         padding: 12px;
-        font-size: 1rem;
     }
 
-    #resumen-rapido {
-        font-size: 1rem;
-        padding: 10px;
+    /* Selector de uniforme */
+    .selector-uniforme {
+        grid-template-columns: 1fr;
     }
 
+    /* Lista de prendas */
     .prenda-item {
         flex-direction: column;
         gap: 10px;
-        text-align: center;
     }
 
-    button, 
-    input[type="radio"] + label,
-    input[type="checkbox"] + label {
+    .prenda-cantidad {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Opciones de pago */
+    .opciones-pago {
+        grid-template-columns: 1fr;
+    }
+
+    /* Medidas */
+    .formulario-medidas {
+        padding: 15px;
+    }
+
+    .campo-medida {
+        grid-template-columns: 1fr;
+    }
+
+    /* Reportes */
+    .grid-reportes {
+        grid-template-columns: 1fr;
+    }
+
+    .reporte-card {
+        padding: 15px;
+    }
+
+    /* Búsqueda */
+    .filtros {
+        flex-direction: column;
+    }
+
+    .filtro-btn {
+        width: 100%;
+    }
+
+    /* Tarjetas de pedido */
+    .tarjeta-pedido {
+        padding: 15px;
+    }
+
+    .pedido-acciones {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .btn-accion {
+        width: 100%;
+    }
+
+    /* Preview de foto */
+    #preview-foto img {
+        max-width: 100%;
+        height: auto;
+    }
+
+    /* Tabla de datos */
+    .tabla-container {
+        overflow-x: auto;
+    }
+
+    .tabla {
+        font-size: 0.9em;
+    }
+
+    /* Mensajes */
+    .mensaje {
+        width: 90%;
+        left: 5%;
+        right: 5%;
+    }
+}
+
+/* Mejoras de accesibilidad para móviles */
+@media (hover: none) {
+    .btn-principal:active {
+        transform: scale(0.98);
+    }
+
+    input[type="radio"],
+    input[type="checkbox"] {
         min-height: 44px;
         min-width: 44px;
-    }
-
-    .radio-grupo label {
-        padding: 15px;
-        margin: 5px;
     }
 
     select {
