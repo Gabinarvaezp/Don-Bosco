@@ -1,0 +1,43 @@
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    .btn-grande {
+        padding: 15px;
+        font-size: 1.1rem;
+    }
+
+    .input-grande {
+        padding: 12px;
+        font-size: 1rem;
+    }
+
+    #resumen-rapido {
+        font-size: 1rem;
+        padding: 10px;
+    }
+
+    .prenda-item {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+
+    button, 
+    input[type="radio"] + label,
+    input[type="checkbox"] + label {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    .radio-grupo label {
+        padding: 15px;
+        margin: 5px;
+    }
+
+    select {
+        height: 44px;
+        font-size: 16px;
+    }
+}
