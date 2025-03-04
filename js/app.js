@@ -1,118 +1,90 @@
 class UniformesApp {
     constructor() {
         this.pedidos = [];
-        this.tipoUniformeActual = 'primaria';
-        this.cargarPedidosGuardados();
+        this.ultimoNumeroRecibo = 0;
+        this.inicializar();
+    }
+
+    inicializar() {
+        this.cargarDatosGuardados();
+        this.actualizarFechaActual();
+        this.actualizarResumen();
         this.inicializarEventos();
     }
 
-    inicializarEventos() {
-        // Eventos para los botones principales
-        document.querySelectorAll('.btn-principal').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const accion = e.target.getAttribute('data-accion');
-                if (accion) this[accion]();
-            });
-        });
+    cargarDatosGuardados() {
+        const pedidosGuardados = localStorage.getItem('pedidos');
+        if (pedidosGuardados) {
+            this.pedidos = JSON.parse(pedidosGuardados);
+        }
+        const ultimoRecibo = localStorage.getItem('ultimoNumeroRecibo');
+        if (ultimoRecibo) {
+            this.ultimoNumeroRecibo = parseInt(ultimoRecibo);
+        }
+    }
 
-        // Eventos para selector de uniforme
-        document.querySelectorAll('.opcion-uniforme').forEach(opcion => {
-            opcion.addEventListener('click', (e) => {
-                this.cambiarTipoUniforme(e.target);
-            });
-        });
+    actualizarFechaActual() {
+        const fechaElement = document.getElementById('fecha-actual');
+        const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        fechaElement.textContent = new Date().toLocaleDateString('es-CO', opciones);
+    }
 
-        // Eventos para opciones de pago
-        document.querySelectorAll('.opcion-pago').forEach(opcion => {
-            opcion.addEventListener('click', (e) => {
-                this.seleccionarFormaPago(e.target);
-            });
-        });
+    actualizarResumen() {
+        const pendientes = this.pedidos.filter(p => p.estado !== 'cancelado_entregado').length;
+        const abonosHoy = this.calcularAbonosHoy();
+        
+        document.getElementById('total-pendientes').textContent = pendientes;
+        document.getElementById('abonos-hoy').textContent = abonosHoy.toLocaleString();
+    }
+
+    calcularAbonosHoy() {
+        const hoy = new Date().toDateString();
+        return this.pedidos
+            .filter(p => new Date(p.fecha).toDateString() === hoy)
+            .reduce((total, p) => total + (p.abono || 0), 0);
     }
 
     mostrarNuevoPedido() {
-        const main = document.querySelector('main');
-        main.innerHTML = this.generarFormularioNuevoPedido();
-        this.actualizarListaPrendas();
+        const contenido = document.getElementById('contenido-principal');
+        const template = document.getElementById('template-nuevo-pedido');
+        contenido.innerHTML = template.innerHTML;
+
+        // Configurar fecha actual
+        const fechaInput = document.getElementById('fecha-pedido');
+        fechaInput.valueAsDate = new Date();
+
+        // Configurar número de recibo
+        const reciboInput = document.getElementById('numero-recibo');
+        reciboInput.value = this.ultimoNumeroRecibo + 1;
+
+        this.cargarPrendasDisponibles('primaria');
+        this.inicializarEventosFormulario();
     }
 
-    generarFormularioNuevoPedido() {
-        return `
-            <div class="formulario-pedido">
-                <h2>📝 Nuevo Pedido</h2>
-                
-                <div class="campo-formulario">
-                    <label>N° Recibo:</label>
-                    <input type="number" class="input-grande" value="${this.generarNumeroRecibo()}" readonly>
-                </div>
-
-                <div class="campo-formulario">
-                    <label>Nombre Cliente:</label>
-                    <input type="text" class="input-grande" placeholder="Nombre completo" required>
-                </div>
-
-                <div class="campo-formulario">
-                    <label>Teléfono:</label>
-                    <input type="tel" class="input-grande" placeholder="Número de teléfono" required>
-                </div>
-
-                <div class="selector-uniforme">
-                    <div class="opcion-uniforme activo" data-tipo="primaria">
-                        👕 Primaria
-                    </div>
-                    <div class="opcion-uniforme" data-tipo="bachillerato">
-                        👔 Bachillerato
-                    </div>
-                </div>
-
-                <div class="lista-prendas"></div>
-
-                <div class="campo-formulario">
-                    <label>💰 Abono:</label>
-                    <input type="number" class="input-grande" value="0" min="0">
-                </div>
-
-                <h3>💳 Forma de Pago</h3>
-                <div class="opciones-pago">
-                    <div class="opcion-pago" data-pago="efectivo">
-                        💵 Efectivo
-                    </div>
-                    <div class="opcion-pago" data-pago="nequi">
-                        📱 Nequi
-                    </div>
-                    <div class="opcion-pago" data-pago="daviplata">
-                        💳 Daviplata
-                    </div>
-                </div>
-
-                <button class="btn-principal" onclick="app.guardarPedido()">
-                    💾 Guardar Pedido
-                </button>
-            </div>
-        `;
-    }
-
-    actualizarListaPrendas() {
-        const listaPrendas = document.querySelector('.lista-prendas');
-        const prendas = PRECIOS[this.tipoUniformeActual];
+    cargarPrendasDisponibles(tipo) {
+        const listaPrendas = document.getElementById('lista-prendas');
+        const prendas = PRECIOS[tipo];
         
         listaPrendas.innerHTML = Object.entries(prendas).map(([prenda, tallas]) => `
             <div class="prenda-item">
                 <div class="prenda-info">
-                    <h4>${this.formatearNombrePrenda(prenda)}</h4>
-                    <select class="select-talla">
-                        ${Object.entries(tallas).map(([talla, precio]) => `
-                            <option value="${talla}">${talla} - $${precio.toLocaleString()}</option>
-                        `).join('')}
+                    <span class="nombre-prenda">${this.formatearNombrePrenda(prenda)}</span>
+                    <select class="select-talla" data-prenda="${prenda}">
+                        <option value="">Seleccionar talla</option>
+                        ${Object.entries(tallas).map(([talla, precio]) => 
+                            `<option value="${talla}">Talla ${talla} - $${precio.toLocaleString()}</option>`
+                        ).join('')}
                     </select>
                 </div>
                 <div class="prenda-cantidad">
-                    <button onclick="app.decrementarCantidad('${prenda}')">-</button>
-                    <input type="number" value="0" min="0" class="cantidad-${prenda}">
-                    <button onclick="app.incrementarCantidad('${prenda}')">+</button>
+                    <button class="btn-cantidad" onclick="app.decrementarCantidad('${prenda}')">-</button>
+                    <input type="number" min="0" value="0" class="input-cantidad" data-prenda="${prenda}">
+                    <button class="btn-cantidad" onclick="app.incrementarCantidad('${prenda}')">+</button>
                 </div>
             </div>
         `).join('');
+
+        this.actualizarTotal();
     }
 
     formatearNombrePrenda(prenda) {
@@ -120,64 +92,139 @@ class UniformesApp {
             sudadera: '👕 Sudadera',
             pantalonSudadera: '👖 Pantalón Sudadera',
             camisetaDeportiva: '👕 Camiseta Deportiva',
-            jardinera: '👗 Jardinera'
+            jardinera: '👗 Jardinera',
+            pantaloneta: '🩳 Pantaloneta'
         };
         return nombres[prenda] || prenda;
     }
 
-    cambiarTipoUniforme(elemento) {
-        document.querySelectorAll('.opcion-uniforme').forEach(op => op.classList.remove('activo'));
-        elemento.classList.add('activo');
-        this.tipoUniformeActual = elemento.getAttribute('data-tipo');
-        this.actualizarListaPrendas();
+    inicializarEventosFormulario() {
+        // Eventos para tipo de uniforme
+        document.querySelectorAll('input[name="tipo-uniforme"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                this.cargarPrendasDisponibles(e.target.value);
+            });
+        });
+
+        // Eventos para cambios en tallas y cantidades
+        document.getElementById('lista-prendas').addEventListener('change', () => {
+            this.actualizarTotal();
+        });
+
+        // Eventos para estado del pedido
+        document.getElementById('estado-pedido').addEventListener('change', () => {
+            this.actualizarSeccionAbono();
+        });
+
+        // Eventos para abono
+        document.getElementById('abono').addEventListener('input', () => {
+            this.actualizarSaldoPendiente();
+        });
+    }
+
+    actualizarTotal() {
+        let total = 0;
+        const tipoUniforme = document.querySelector('input[name="tipo-uniforme"]:checked').value;
+        
+        document.querySelectorAll('.prenda-item').forEach(item => {
+            const prenda = item.querySelector('.select-talla').dataset.prenda;
+            const talla = item.querySelector('.select-talla').value;
+            const cantidad = parseInt(item.querySelector('.input-cantidad').value) || 0;
+            
+            if (talla && cantidad > 0) {
+                total += PRECIOS[tipoUniforme][prenda][talla] * cantidad;
+            }
+        });
+
+        document.getElementById('total-monto').textContent = `$${total.toLocaleString()}`;
+        this.actualizarSaldoPendiente();
+    }
+
+    actualizarSaldoPendiente() {
+        const total = parseInt(document.getElementById('total-monto').textContent.replace(/[^0-9]/g, '')) || 0;
+        const abono = parseInt(document.getElementById('abono').value) || 0;
+        const saldoPendiente = total - abono;
+        
+        document.getElementById('saldo-pendiente').textContent = `$${saldoPendiente.toLocaleString()}`;
     }
 
     guardarPedido() {
-        const pedido = {
-            numeroRecibo: document.querySelector('input[type="number"]').value,
-            cliente: document.querySelector('input[placeholder="Nombre completo"]').value,
-            telefono: document.querySelector('input[placeholder="Número de teléfono"]').value,
-            tipoUniforme: this.tipoUniformeActual,
-            prendas: this.obtenerPrendasSeleccionadas(),
-            abono: parseFloat(document.querySelector('input[type="number"][min="0"]').value),
-            formaPago: document.querySelector('.opcion-pago.activo')?.getAttribute('data-pago') || 'efectivo',
-            fecha: new Date(),
-            estado: 'pendiente'
-        };
-
+        const pedido = this.recolectarDatosPedido();
+        
         if (this.validarPedido(pedido)) {
             this.pedidos.push(pedido);
-            this.guardarPedidosLocal();
-            this.mostrarMensaje('✅ Pedido guardado correctamente');
+            this.ultimoNumeroRecibo = parseInt(pedido.numeroRecibo);
+            this.guardarDatos();
+            this.actualizarResumen();
+            alert('Pedido guardado exitosamente');
             this.mostrarNuevoPedido();
         }
     }
 
+    recolectarDatosPedido() {
+        const prendasSeleccionadas = [];
+        document.querySelectorAll('.prenda-item').forEach(item => {
+            const prenda = item.querySelector('.select-talla').dataset.prenda;
+            const talla = item.querySelector('.select-talla').value;
+            const cantidad = parseInt(item.querySelector('.input-cantidad').value) || 0;
+            
+            if (talla && cantidad > 0) {
+                prendasSeleccionadas.push({
+                    tipo: prenda,
+                    talla: talla,
+                    cantidad: cantidad,
+                    entregada: false
+                });
+            }
+        });
+
+        return {
+            numeroRecibo: document.getElementById('numero-recibo').value,
+            fecha: document.getElementById('fecha-pedido').value,
+            cliente: document.getElementById('nombre-cliente').value,
+            telefono: document.getElementById('telefono-cliente').value,
+            tipoUniforme: document.querySelector('input[name="tipo-uniforme"]:checked').value,
+            prendas: prendasSeleccionadas,
+            total: parseInt(document.getElementById('total-monto').textContent.replace(/[^0-9]/g, '')),
+            abono: parseInt(document.getElementById('abono').value) || 0,
+            estado: document.getElementById('estado-pedido').value,
+            prendasEntregadas: []
+        };
+    }
+
     validarPedido(pedido) {
         if (!pedido.cliente) {
-            this.mostrarMensaje('⚠️ Por favor ingrese el nombre del cliente');
+            alert('Por favor ingrese el nombre del cliente');
             return false;
         }
         if (!pedido.telefono) {
-            this.mostrarMensaje('⚠️ Por favor ingrese el teléfono del cliente');
+            alert('Por favor ingrese el teléfono del cliente');
             return false;
         }
         if (pedido.prendas.length === 0) {
-            this.mostrarMensaje('⚠️ Por favor seleccione al menos una prenda');
+            alert('Por favor seleccione al menos una prenda');
             return false;
         }
         return true;
     }
 
-    mostrarMensaje(mensaje) {
-        const div = document.createElement('div');
-        div.className = 'mensaje';
-        div.textContent = mensaje;
-        document.body.appendChild(div);
-        setTimeout(() => div.remove(), 3000);
+    guardarDatos() {
+        localStorage.setItem('pedidos', JSON.stringify(this.pedidos));
+        localStorage.setItem('ultimoNumeroRecibo', this.ultimoNumeroRecibo.toString());
     }
 
-    // ... más métodos
+    incrementarCantidad(prenda) {
+        const input = document.querySelector(`.input-cantidad[data-prenda="${prenda}"]`);
+        input.value = (parseInt(input.value) || 0) + 1;
+        this.actualizarTotal();
+    }
+
+    decrementarCantidad(prenda) {
+        const input = document.querySelector(`.input-cantidad[data-prenda="${prenda}"]`);
+        const valor = (parseInt(input.value) || 0) - 1;
+        input.value = valor < 0 ? 0 : valor;
+        this.actualizarTotal();
+    }
 }
 
 // Inicializar la aplicación
