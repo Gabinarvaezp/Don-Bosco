@@ -17,7 +17,7 @@ class SistemaPedidos {
 
     crearNuevoPedido(datos) {
         const pedido = {
-            numeroRecibo: this.generarNuevoNumeroRecibo(),
+            numeroRecibo: datos.numeroRecibo,
             fecha: new Date(),
             cliente: datos.cliente,
             telefono: datos.telefono,
@@ -26,7 +26,6 @@ class SistemaPedidos {
             total: this.calcularTotal(datos.prendas),
             abono: datos.abono || 0,
             estado: 'PENDIENTE',
-            metodoPago: datos.metodoPago,
             fotoMedidas: datos.fotoMedidas,
             medidas: datos.medidas
         };
@@ -52,13 +51,5 @@ class SistemaPedidos {
         if (pedidosGuardados) {
             this.pedidos = JSON.parse(pedidosGuardados);
         }
-    }
-
-    obtenerPedidosDelDia() {
-        const hoy = new Date();
-        return this.pedidos.filter(pedido => {
-            const fechaPedido = new Date(pedido.fecha);
-            return fechaPedido.toDateString() === hoy.toDateString();
-        });
     }
 }
