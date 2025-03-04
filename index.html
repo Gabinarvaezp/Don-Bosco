@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Uniformes - Don Bosco</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/mobile.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Uniformes Don Bosco</h1>
+            <div id="fecha-actual"></div>
+            <div id="resumen-rapido">
+                <div>Pedidos pendientes: <span id="total-pendientes">0</span></div>
+                <div>Por entregar hoy: <span id="entregas-hoy">0</span></div>
+                <div>Abonos del día: $<span id="abonos-hoy">0</span></div>
+            </div>
+        </header>
+
+        <nav class="menu-principal">
+            <button class="btn-grande" onclick="mostrarNuevoPedido()">
+                <i class="fas fa-plus-circle"></i>
+                Nuevo Pedido
+            </button>
+            <button class="btn-grande" onclick="mostrarPedidosPendientes()">
+                <i class="fas fa-clock"></i>
+                Pedidos Pendientes
+            </button>
+            <button class="btn-grande" onclick="mostrarPedidosCompletados()">
+                <i class="fas fa-check-circle"></i>
+                Pedidos Completados
+            </button>
+            <button class="btn-grande" onclick="mostrarVentasDelDia()">
+                <i class="fas fa-dollar-sign"></i>
+                Ventas del Día
+            </button>
+            <button class="btn-grande" onclick="mostrarConfiguracion()">
+                <i class="fas fa-cog"></i>
+                Configuración
+            </button>
+        </nav>
+
+        <main id="contenido-principal"></main>
+    </div>
+
+    <template id="template-nuevo-pedido">
+        <div class="formulario-pedido">
+            <h2>Nuevo Pedido</h2>
+            <div class="campo-formulario">
+                <label>N° Recibo:</label>
+                <input type="number" id="numero-recibo" readonly>
+            </div>
+            <div class="campo-formulario">
+                <label>Nombre Cliente:</label>
+                <input type="text" id="nombre-cliente" class="input-grande">
+            </div>
+            <div class="campo-formulario">
+                <label>Teléfono:</label>
+                <input type="tel" id="telefono-cliente" class="input-grande">
+            </div>
+            <div class="selector-tipo">
+                <h3>Tipo de Uniforme</h3>
+                <div class="radio-grupo">
+                    <input type="radio" id="primaria" name="tipo-uniforme" checked>
+                    <label for="primaria">Primaria</label>
+                    <input type="radio" id="bachillerato" name="tipo-uniforme">
+                    <label for="bachillerato">Bachillerato</label>
+                </div>
+            </div>
+            <div id="lista-prendas"></div>
+            <div class="campo-formulario">
+                <label>Subir Foto de Medidas:</label>
+                <input type="file" id="foto-medidas" accept="image/*">
+            </div>
+            <div class="campo-formulario">
+                <label>Medidas (cm):</label>
+                <input type="text" id="medidas-jardinera" placeholder="Ej: 30x40">
+            </div>
+            <div class="campo-formulario">
+                <label>Abono:</label>
+                <input type="number" id="abono" value="0">
+            </div>
+        </div>
+    </template>
+
+    <script src="js/precios.js"></script>
+    <script src="js/pedidos.js"></script>
+    <script src="js/exportar.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
