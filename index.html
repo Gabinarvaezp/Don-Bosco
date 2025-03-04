@@ -51,7 +51,7 @@
             <h2>Nuevo Pedido</h2>
             <div class="campo-formulario">
                 <label>N° Recibo:</label>
-                <input type="number" id="numero-recibo" readonly>
+                <input type="number" id="numero-recibo" class="input-grande" value="1">
             </div>
             <div class="campo-formulario">
                 <label>Nombre Cliente:</label>
@@ -72,17 +72,18 @@
             </div>
             <div id="lista-prendas"></div>
             <div class="campo-formulario">
+                <label>Abono:</label>
+                <input type="number" id="abono" class="input-grande" value="0">
+            </div>
+            <div class="campo-formulario">
                 <label>Subir Foto de Medidas:</label>
                 <input type="file" id="foto-medidas" accept="image/*">
             </div>
             <div class="campo-formulario">
                 <label>Medidas (cm):</label>
-                <input type="text" id="medidas-jardinera" placeholder="Ej: 30x40">
+                <input type="text" id="medidas-jardinera" placeholder="Ej: 30x40" class="input-grande">
             </div>
-            <div class="campo-formulario">
-                <label>Abono:</label>
-                <input type="number" id="abono" value="0">
-            </div>
+            <button class="btn-grande" onclick="crearNuevoPedido()">Crear Pedido</button>
         </div>
     </template>
 
